@@ -669,7 +669,7 @@ export function Chat(props: {
               onClick={renameSession}
             />
           </div>
-          <div className={styles["window-action-button"]}>
+          {/* <div className={styles["window-action-button"]}>
             <IconButton
               icon={<ExportIcon />}
               bordered
@@ -681,7 +681,7 @@ export function Chat(props: {
                 );
               }}
             />
-          </div>
+          </div> */}
           {!isMobileScreen() && (
             <div className={styles["window-action-button"]}>
               <IconButton
