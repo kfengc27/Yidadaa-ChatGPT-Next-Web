@@ -35,18 +35,44 @@ async function fetchEN() {
   }
 }
 
+// async function main() {
+//   Promise.all([fetchCN(), fetchEN()])
+//     .then(([cn, en]) => {
+//       fs.writeFile(FILE, JSON.stringify({ cn, en }));
+//     })
+//     .catch((e) => {
+//       console.error("[Fetch] failed to fetch prompts");
+//       fs.writeFile(FILE, JSON.stringify({ cn: [], en: [] }));
+//     })
+//     .finally(() => {
+//       console.log("[Fetch] saved to " + FILE);
+//     });
+// }
+
+// main();
+
 async function main() {
+  let existingData = { cn: [], en: [] };
+
+  try {
+    // Try to read existing data if the file exists
+    const fileContent = await fs.readFile(FILE, "utf8");
+    existingData = JSON.parse(fileContent);
+  } catch (error) {
+    console.warn("[Fetch] No existing prompts.json found. Creating a new one...");
+  }
+
   Promise.all([fetchCN(), fetchEN()])
     .then(([cn, en]) => {
-      fs.writeFile(FILE, JSON.stringify({ cn, en }));
+      const newData = {
+        cn: cn.length ? cn : existingData.cn, // Keep old CN data if fetch fails
+        en: en.length ? en : existingData.en, // Keep old EN data if fetch fails
+      };
+
+      fs.writeFile(FILE, JSON.stringify(newData, null, 2));
+      console.log("[Fetch] Successfully updated prompts.json");
     })
     .catch((e) => {
-      console.error("[Fetch] failed to fetch prompts");
-      fs.writeFile(FILE, JSON.stringify({ cn: [], en: [] }));
-    })
-    .finally(() => {
-      console.log("[Fetch] saved to " + FILE);
+      console.error("[Fetch] Failed to fetch prompts, keeping old data", e);
     });
 }
-
-main();
