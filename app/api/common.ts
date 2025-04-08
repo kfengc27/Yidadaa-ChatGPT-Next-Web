@@ -19,8 +19,7 @@ export async function requestOpenai(req: NextRequest) {
   if (!baseUrl.startsWith("http")) {
     baseUrl = `${PROTOCOL}://${baseUrl}`;
   }
-  console.log("[Proxy] ", openaiPath);
-  console.log("[Base Url]", baseUrl);
+
   return fetch(`${baseUrl}/${openaiPath}`, {
     headers: {
       "Content-Type": "application/json",

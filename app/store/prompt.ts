@@ -36,9 +36,7 @@ export const SearchService = {
   builtinPrompts: [] as Prompt[],
 
   init(builtinPrompts: Prompt[], userPrompts: Prompt[]) {
-    if (this.ready) {
-      return;
-    }
+    if (this.ready) return;
     this.allPrompts = userPrompts.concat(builtinPrompts);
     this.builtinPrompts = builtinPrompts.slice();
     this.builtinEngine.setCollection(builtinPrompts);
@@ -76,7 +74,7 @@ export const usePromptStore = create<PromptStore>()(
 
         set(() => ({
           latestId: prompt.id!,
-          prompts: prompts,
+          prompts,
         }));
 
         return prompt.id!;
@@ -116,7 +114,6 @@ export const usePromptStore = create<PromptStore>()(
 
       search(text) {
         if (text.length === 0) {
-          // return all rompts
           return SearchService.allPrompts.concat([...get().getUserPrompts()]);
         }
         return SearchService.search(text) as Prompt[];
@@ -125,41 +122,50 @@ export const usePromptStore = create<PromptStore>()(
     {
       name: PROMPT_KEY,
       version: 1,
-      onRehydrateStorage(state) {
-        const PROMPT_URL = "./prompts.json";
+      onRehydrateStorage() {
+        return () => {
+          const PROMPT_URL = "./prompts.json";
+          fetch(PROMPT_URL)
+            .then((res) => res.json())
+            .then((res) => {
+              const enPrompt: Prompt = {
+                id: Math.random(),
+                title: "🌍 SDG AI Knowledge System",
+                content: res.en.join("\n"),
+              };
 
-        type PromptList = Array<[string, string]>;
+              const builtinPrompts = [enPrompt];
+              const userPrompts =
+                usePromptStore.getState().getUserPrompts() ?? [];
 
-        fetch(PROMPT_URL)
-          .then((res) => res.json())
-          .then((res) => {
-            let fetchPrompts = [res.en, res.cn];
-            if (getLang() === "cn") {
-              fetchPrompts = fetchPrompts.reverse();
-            }
-            const builtinPrompts = fetchPrompts.map(
-              (promptList: PromptList) => {
-                return promptList.map(
-                  ([title, content]) =>
-                    ({
-                      id: Math.random(),
-                      title,
-                      content,
-                    } as Prompt),
-                );
-              },
-            );
-
-            const userPrompts =
-              usePromptStore.getState().getUserPrompts() ?? [];
-
-            const allPromptsForSearch = builtinPrompts
-              .reduce((pre, cur) => pre.concat(cur), [])
-              .filter((v) => !!v.title && !!v.content);
-            SearchService.count.builtin = res.en.length + res.cn.length;
-            SearchService.init(allPromptsForSearch, userPrompts);
-          });
+              const allPromptsForSearch = builtinPrompts.filter(
+                (v) => !!v.title && !!v.content,
+              );
+              SearchService.count.builtin = 1;
+              SearchService.init(allPromptsForSearch, userPrompts);
+            });
+        };
       },
     },
   ),
 );
+
+// 🔐 Forced system prompt injected into all conversations
+export const FORCED_SYSTEM_PROMPT = `
+You are the UN Sustainable Development Goals (SDG) AI Knowledge System, an intelligent assistant dedicated to providing insights, analysis, and recommendations related to SDGs.
+
+Your mission is to help users understand and achieve the 17 SDGs, such as poverty eradication, climate action, gender equality, and responsible consumption. You offer tailored suggestions in sectors like education, health, technology, and policy.
+
+Here are examples of the tasks you assist with:
+- Suggest three initiatives to achieve [SDG Goal Name] in [specific domain, e.g., education, health, marketing, etc.].
+- How can we promote quality education (SDG 4) using technology in underserved regions?
+- What are some actions individuals can take to contribute to clean water and sanitation (SDG 6)?
+- Provide creative ideas to make cities and communities more sustainable (SDG 11).
+- Suggest innovative strategies to reduce inequalities (SDG 10) in our community.
+- How can I involve the marketing discipline in advancing SDG 3 (Good Health and Well-Being)?
+- Can you help me develop an actionable plan for achieving [SDG Goal Name] in [location/context]?
+- Suggest steps for implementing a local initiative to combat climate change (SDG 13).
+- What should I include in a proposal to support life below water (SDG 14)?
+- How can I design an educational seminar to promote gender equality (SDG 5)?
+- Provide a plan for a community event to raise awareness about affordable and clean energy (SDG 7).
+`.trim();

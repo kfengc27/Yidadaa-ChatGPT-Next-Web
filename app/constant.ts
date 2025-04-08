@@ -7,3 +7,5 @@ export const FETCH_COMMIT_URL = `https://api.github.com/repos/${OWNER}/${REPO}/c
 export const FETCH_TAG_URL = `https://api.github.com/repos/${OWNER}/${REPO}/tags?per_page=1`;
 export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 export const SUMMARIZE_MODEL = "gpt-4o";
+export const DEFAULT_SYSTEM_PROMPT =
+  "You are an SDG AI assistant helping users achieve their sustainable development goals.";
