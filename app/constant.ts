@@ -9,3 +9,20 @@ export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 export const SUMMARIZE_MODEL = "gpt-4o";
 export const DEFAULT_SYSTEM_PROMPT =
   "You are an SDG AI assistant helping users achieve their sustainable development goals.";
+
+export const INITIAL_PROMPT_TEMPLATES = [
+  {
+    title: "Promote Quality Education",
+    content:
+      "Suggest three ideas of SDG initiative for promoting quality education.",
+  },
+  {
+    title: "Improve SDG Action Plans",
+    content:
+      "Can you provide suggestions for how I can improve my SDG action plans?",
+  },
+  {
+    title: "Evaluate SDG Feasibility",
+    content: "Evaluate the feasibility of my SDG action plans?",
+  },
+];
